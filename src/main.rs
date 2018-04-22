@@ -1,10 +1,13 @@
 mod playlist;
 mod draw;
+mod play;
 
 extern crate chan_signal;
 extern crate termion;
 
 use chan_signal::Signal;
+
+use play::play;
 
 use playlist::Playlist;
 
@@ -27,6 +30,7 @@ fn main() {
     // generate shuffled playlist
     let playlist = Playlist::new();
     draw::all(&playlist);
+    let (_fmod, _mp3, chan) = play(&playlist.songs[playlist.index]);
 
     // redraw when the terminal window is resized
     let signal = chan_signal::notify(&[Signal::WINCH]);
@@ -42,6 +46,9 @@ fn main() {
         match key.unwrap() {
             Key::Char('q') => break,
             Key::Ctrl('c') => break,
+            Key::Char(' ') => {
+                chan.set_paused(!chan.get_paused().unwrap());
+            }
             _ => {},
         }
     }

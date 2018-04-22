@@ -54,6 +54,7 @@ impl Playlist {
             }
 
             let song = Song{
+                path: path.to_string(),
                 artist: tag.artist().unwrap().to_string(),
                 title: tag.title().unwrap().to_string(),
                 duration: duration.unwrap(),
@@ -70,6 +71,7 @@ impl Playlist {
 }
 
 pub struct Song {
+    pub path: String,
     pub artist: String,
     pub title: String,
     pub duration: time::Duration,
