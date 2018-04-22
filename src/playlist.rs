@@ -36,11 +36,13 @@ impl Playlist {
             if duration.is_err() {
                 duration = Ok(mp3_metadata::read_from_file(path).unwrap().duration);
             }
-            playlist.songs.push(Song{
+            let song = Song{
                 artist: tag.artist().unwrap().to_string(),
                 title: tag.title().unwrap().to_string(),
                 duration: duration.unwrap(),
-            });
+            };
+            song.draw(false);
+            playlist.songs.push(song);
         }
 
         playlist

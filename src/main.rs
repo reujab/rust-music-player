@@ -1,4 +1,5 @@
 mod playlist;
+mod draw;
 
 // extern crate chan_signal;
 extern crate termion;
@@ -10,7 +11,6 @@ use playlist::Playlist;
 use std::io::Write;
 use std::io::{stdin, stdout};
 
-use termion::color;
 use termion::cursor;
 use termion::event::Key;
 use termion::input::TermRead;
@@ -18,17 +18,13 @@ use termion::raw::IntoRawMode;
 use termion::screen;
 
 fn main() {
-    let playlist = Playlist::new();
-    for song in playlist.songs {
-        println!("{} - {}", song.artist, song.title);
-    }
-    return;
-
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
 
     print!("{}{}{}", screen::ToAlternateScreen, cursor::Hide, cursor::Goto(1, 1));
     stdout.flush().unwrap();
+
+    let playlist = Playlist::new();
 
     // // redraw when the terminal window is resized
     // let signal = chan_signal::notify(&[Signal::WINCH]);
