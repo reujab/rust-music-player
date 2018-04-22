@@ -30,10 +30,13 @@ fn main() {
     // generate shuffled playlist
     let playlist = Playlist::new();
     draw::all(&playlist);
+
+    // this variable must be crated BEFORE fmod for some reason
+    let signal = chan_signal::notify(&[Signal::WINCH]);
+
     let (_fmod, _mp3, chan) = play(&playlist.songs[playlist.index]);
 
     // redraw when the terminal window is resized
-    let signal = chan_signal::notify(&[Signal::WINCH]);
     std::thread::spawn(move || {
         loop {
             signal.recv().unwrap();
