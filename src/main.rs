@@ -1,10 +1,10 @@
 mod playlist;
 mod draw;
 
-// extern crate chan_signal;
+extern crate chan_signal;
 extern crate termion;
 
-// use chan_signal::Signal;
+use chan_signal::Signal;
 
 use playlist::Playlist;
 
@@ -25,16 +25,16 @@ fn main() {
     stdout.flush().unwrap();
 
     let playlist = Playlist::new();
-    draw::all(playlist);
+    draw::all(&playlist);
 
-    // // redraw when the terminal window is resized
-    // let signal = chan_signal::notify(&[Signal::WINCH]);
-    // std::thread::spawn(move || {
-    //     loop {
-    //         signal.recv().unwrap();
-    //         draw(playlist);
-    //     }
-    // });
+    // redraw when the terminal window is resized
+    let signal = chan_signal::notify(&[Signal::WINCH]);
+    std::thread::spawn(move || {
+        loop {
+            signal.recv().unwrap();
+            draw::all(&playlist);
+        }
+    });
 
     // wait for q or ^C
     for key in stdin.keys() {

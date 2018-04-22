@@ -16,7 +16,7 @@ fn size() -> (usize, usize) {
     (width as usize, height as usize)
 }
 
-pub fn all(playlist: Playlist) {
+pub fn all(playlist: &Playlist) {
     let (_, height) = size();
     print!("{}{}", clear::All, cursor::Goto(1, 1));
     stdout().flush().unwrap();
