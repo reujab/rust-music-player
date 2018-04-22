@@ -24,6 +24,7 @@ fn main() {
     print!("{}{}{}", screen::ToAlternateScreen, cursor::Hide, cursor::Goto(1, 1));
     stdout.flush().unwrap();
 
+    // generate shuffled playlist
     let playlist = Playlist::new();
     draw::all(&playlist);
 

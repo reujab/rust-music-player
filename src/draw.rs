@@ -11,11 +11,13 @@ use self::termion::clear;
 use self::termion::cursor;
 use self::termion::style;
 
+// gets terminal size
 fn size() -> (usize, usize) {
     let (width, height) = termion::terminal_size().unwrap();
     (width as usize, height as usize)
 }
 
+// clears the screen and draws everything
 pub fn all(playlist: &Playlist) {
     let (_, height) = size();
     print!("{}{}", clear::All, cursor::Goto(1, 1));
