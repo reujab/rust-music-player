@@ -13,6 +13,7 @@ use playlist::Playlist;
 
 use std::io::Write;
 use std::io::{stdin, stdout};
+use std::thread;
 
 use termion::cursor;
 use termion::event::Key;
@@ -37,7 +38,7 @@ fn main() {
     let (_fmod, _mp3, chan) = play(&playlist.songs[playlist.index]);
 
     // redraw when the terminal window is resized
-    std::thread::spawn(move || {
+    thread::spawn(move || {
         loop {
             signal.recv().unwrap();
             draw::all(&playlist);
