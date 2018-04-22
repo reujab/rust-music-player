@@ -48,6 +48,6 @@ pub fn load_progress(progress: f32) {
     let bar = "#".repeat((progress * (width as f32 - 7.0)) as usize);
     let percent = ((progress * 100.0) as usize).to_string();
 
-    print!("{}{}[{}{}]{}{}%{}", cursor::Save, cursor::Goto(1, height as u16), bar, " ".repeat(width - bar.len() - 7), " ".repeat(4 - percent.len()), percent, cursor::Restore);
+    print!("{save}{goto}[{bar}{empty}]{spaces}{percent}%{restore}", save=cursor::Save, goto=cursor::Goto(1, height as u16), bar=bar, empty=" ".repeat(width - bar.len() - 7), spaces=" ".repeat(4 - percent.len()), percent=percent, restore=cursor::Restore);
     stdout().flush().unwrap();
 }
