@@ -25,6 +25,7 @@ fn main() {
     stdout.flush().unwrap();
 
     let playlist = Playlist::new();
+    draw::all(playlist);
 
     // // redraw when the terminal window is resized
     // let signal = chan_signal::notify(&[Signal::WINCH]);
@@ -45,5 +46,5 @@ fn main() {
     }
 
     // reset terminal
-    print!("{}{}", screen::ToMainScreen, cursor::Show)
+    print!("{}{}", screen::ToMainScreen, cursor::Show);
 }
