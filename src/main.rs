@@ -33,14 +33,14 @@ fn main() {
     draw::all(&playlist);
 
     // this variable must be crated BEFORE fmod for some reason
-    let signal = chan_signal::notify(&[Signal::WINCH]);
+    let winch = chan_signal::notify(&[Signal::WINCH]);
 
     let (_fmod, _mp3, chan) = play(&playlist.songs[playlist.index]);
 
     // redraw when the terminal window is resized
     thread::spawn(move || {
         loop {
-            signal.recv().unwrap();
+            winch.recv().unwrap();
             draw::all(&playlist);
         }
     });
