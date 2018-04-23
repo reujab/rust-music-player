@@ -57,15 +57,15 @@ fn main() {
     // wait for q or ^C
     for key in stdin.keys() {
         match key.unwrap() {
-            Key::Char('q') => break,
-            Key::Ctrl('c') => break,
+            Key::Char('q') => { break }
+            Key::Ctrl('c') => { break }
             Key::Char(' ') => {
                 ctrl_tx.send(Command::Pause).unwrap();
-            },
+            }
             Key::Down => {
                 ctrl_tx.send(Command::Skip).unwrap();
-            },
-            _ => {},
+            }
+            _ => {}
         }
     }
 
