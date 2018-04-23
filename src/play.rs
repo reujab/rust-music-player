@@ -40,6 +40,14 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
                     Ok(Command::Pause) => {
                         chan.set_paused(!chan.get_paused().unwrap());
                     }
+                    Ok(Command::Prev) => {
+                        let mut playlist = playlist.lock().unwrap();
+                        if playlist.index != 0 {
+                            playlist.index -= 1;
+                        }
+                        playlist.index -= 1;
+                        chan.stop();
+                    }
                     Ok(Command::Skip) => {
                         chan.stop();
                     }
