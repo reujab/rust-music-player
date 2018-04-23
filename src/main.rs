@@ -26,6 +26,7 @@ use termion::screen;
 
 pub enum Command {
     Pause,
+    Skip,
 }
 
 fn main() {
@@ -64,7 +65,10 @@ fn main() {
             Key::Ctrl('c') => break,
             Key::Char(' ') => {
                 ctrl_tx.send(Command::Pause).unwrap();
-            }
+            },
+            Key::Down => {
+                ctrl_tx.send(Command::Skip).unwrap();
+            },
             _ => {},
         }
     }

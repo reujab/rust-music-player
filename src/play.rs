@@ -28,7 +28,8 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
                     // unfortunately, polling is the only way to determine if the song has
                     // finished playing
                     Err(mpsc::RecvTimeoutError::Timeout) => {
-                        if !chan.is_playing().unwrap() {
+                        let playing = chan.is_playing();
+                        if playing.is_err() || !playing.unwrap() {
                             playlist.lock().unwrap().index += 1;
                             draw::all(&playlist.lock().unwrap());
                             break;
@@ -38,6 +39,9 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
 
                     Ok(Command::Pause) => {
                         chan.set_paused(!chan.get_paused().unwrap());
+                    }
+                    Ok(Command::Skip) => {
+                        chan.stop();
                     }
                 }
             }
