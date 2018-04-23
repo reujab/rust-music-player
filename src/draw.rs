@@ -2,14 +2,12 @@ extern crate termion;
 
 use playlist::Playlist;
 use playlist::Song;
-
-use std::io::Write;
-use std::io::stdout;
-
-use self::termion::color;
 use self::termion::clear;
+use self::termion::color;
 use self::termion::cursor;
 use self::termion::style;
+use std::io::Write;
+use std::io::stdout;
 
 // gets terminal size
 fn size() -> (usize, usize) {

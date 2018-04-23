@@ -6,18 +6,14 @@ extern crate chan_signal;
 extern crate termion;
 
 use chan_signal::Signal;
-
 use play::play;
-
 use playlist::Playlist;
-
 use std::io::Write;
 use std::io::{stdin, stdout};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::mpsc;
 use std::thread;
-
 use termion::cursor;
 use termion::event::Key;
 use termion::input::TermRead;

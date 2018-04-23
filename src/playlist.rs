@@ -4,11 +4,9 @@ extern crate mp3_metadata;
 extern crate rand;
 extern crate walkdir;
 
+use draw;
 use self::rand::Rng;
 use self::walkdir::WalkDir;
-
-use draw;
-
 use std::env;
 use std::time;
 
