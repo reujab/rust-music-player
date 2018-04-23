@@ -13,6 +13,9 @@ use playlist::Playlist;
 
 use std::io::Write;
 use std::io::{stdin, stdout};
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::mpsc;
 use std::thread;
 
 use termion::cursor;
@@ -20,6 +23,10 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::screen;
+
+pub enum Command {
+    Pause,
+}
 
 fn main() {
     let stdin = stdin();
@@ -29,21 +36,26 @@ fn main() {
     stdout.flush().unwrap();
 
     // generate shuffled playlist
-    let playlist = Playlist::new();
-    draw::all(&playlist);
+    let playlist = Arc::new(Mutex::new(Playlist::new()));
+    draw::all(&playlist.lock().unwrap());
 
     // this variable must be crated BEFORE fmod for some reason
     let winch = chan_signal::notify(&[Signal::WINCH]);
 
-    let (_fmod, _mp3, chan) = play(&playlist.songs[playlist.index]);
-
     // redraw when the terminal window is resized
-    thread::spawn(move || {
-        loop {
-            winch.recv().unwrap();
-            draw::all(&playlist);
-        }
-    });
+    {
+        let playlist = playlist.clone();
+        thread::spawn(move || {
+            loop {
+                winch.recv().unwrap();
+                draw::all(&playlist.lock().unwrap());
+            }
+        });
+    }
+
+    // music control channel
+    let (ctrl_tx, ctrl_rx) = mpsc::channel();
+    play(playlist.clone(), ctrl_rx);
 
     // wait for q or ^C
     for key in stdin.keys() {
@@ -51,7 +63,7 @@ fn main() {
             Key::Char('q') => break,
             Key::Ctrl('c') => break,
             Key::Char(' ') => {
-                chan.set_paused(!chan.get_paused().unwrap());
+                ctrl_tx.send(Command::Pause).unwrap();
             }
             _ => {},
         }

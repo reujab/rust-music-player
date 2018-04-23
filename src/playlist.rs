@@ -68,6 +68,10 @@ impl Playlist {
 
         playlist
     }
+
+    pub fn get_song(&self) -> &Song {
+        &self.songs[self.index]
+    }
 }
 
 pub struct Song {
