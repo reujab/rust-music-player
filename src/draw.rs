@@ -27,7 +27,14 @@ pub fn all(playlist: &Playlist, chan: &rfmod::Channel) {
 // draws every displayable song
 pub fn music(playlist: &Playlist) {
     let (_, height) = size();
-    for i in 0..height-1 {
+    let begin = if playlist.index < 3 || playlist.songs.len() <= height-1 {
+        0
+    } else if playlist.songs[playlist.index..].len() < height - 3 {
+        playlist.songs.len() - height + 1
+    } else {
+        playlist.index - 3
+    };
+    for i in begin..begin+height-1 {
         if i < playlist.songs.len() {
             playlist.songs[i].draw(i == playlist.index);
         }
