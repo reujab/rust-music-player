@@ -40,6 +40,9 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
                                 }
                             } else {
                                 playlist.index += 1;
+                                if playlist.index == playlist.songs.len() {
+                                    playlist.index = 0;
+                                }
                             }
                             break;
                         }
