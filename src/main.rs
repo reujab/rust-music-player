@@ -21,6 +21,7 @@ use termion::raw::IntoRawMode;
 use termion::screen;
 
 pub enum Command {
+    Draw,
     Pause,
     Prev,
     Skip,
@@ -35,25 +36,25 @@ fn main() {
 
     // generate shuffled playlist
     let playlist = Arc::new(Mutex::new(Playlist::new()));
-    draw::all(&playlist.lock().unwrap());
+    draw::music(&playlist.lock().unwrap());
 
-    // this variable must be crated BEFORE fmod for some reason
+    // this variable must be created BEFORE fmod for some reason
     let winch = chan_signal::notify(&[Signal::WINCH]);
+    // music control channel
+    let (ctrl_tx, ctrl_rx) = mpsc::channel();
+
+    play(playlist.clone(), ctrl_rx);
 
     // redraw when the terminal window is resized
     {
-        let playlist = playlist.clone();
+        let ctrl_tx = ctrl_tx.clone();
         thread::spawn(move || {
             loop {
                 winch.recv().unwrap();
-                draw::all(&playlist.lock().unwrap());
+                ctrl_tx.send(Command::Draw).unwrap();
             }
         });
     }
-
-    // music control channel
-    let (ctrl_tx, ctrl_rx) = mpsc::channel();
-    play(playlist.clone(), ctrl_rx);
 
     // wait for q or ^C
     for key in stdin.keys() {

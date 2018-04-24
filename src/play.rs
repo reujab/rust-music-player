@@ -17,35 +17,44 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
             panic!("failed to initialize fmod");
         }
 
+        let mut prev = false;
         loop {
             let mp3 = fmod.create_sound(&playlist.lock().unwrap().get_song().path, None, None).unwrap();
             // `chan` CANNOT be used in any other thread than the one it is created in
             // the awkward code below is designed around that
             let chan = mp3.play().unwrap();
+            draw::all(&playlist.lock().unwrap(), &chan);
             loop {
                 let val = ctrl_rx.recv_timeout(Duration::from_millis(50));
                 match val {
                     // unfortunately, polling is the only way to determine if the song has
                     // finished playing
                     Err(mpsc::RecvTimeoutError::Timeout) => {
+                        let mut playlist = playlist.lock().unwrap();
                         let playing = chan.is_playing();
                         if playing.is_err() || !playing.unwrap() {
-                            playlist.lock().unwrap().index += 1;
-                            draw::all(&playlist.lock().unwrap());
+                            if prev {
+                                prev = false;
+                                if playlist.index != 0 {
+                                    playlist.index -= 1;
+                                }
+                            } else {
+                                playlist.index += 1;
+                            }
                             break;
                         }
+                        draw::controls(&playlist, &chan);
                     }
                     Err(_) => {}
 
+                    Ok(Command::Draw) => {
+                        draw::all(&playlist.lock().unwrap(), &chan);
+                    }
                     Ok(Command::Pause) => {
                         chan.set_paused(!chan.get_paused().unwrap());
                     }
                     Ok(Command::Prev) => {
-                        let mut playlist = playlist.lock().unwrap();
-                        if playlist.index != 0 {
-                            playlist.index -= 1;
-                        }
-                        playlist.index -= 1;
+                        prev = true;
                         chan.stop();
                     }
                     Ok(Command::Skip) => {

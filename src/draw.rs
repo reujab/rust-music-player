@@ -1,3 +1,4 @@
+extern crate rfmod;
 extern crate termion;
 
 use playlist::Playlist;
@@ -16,10 +17,16 @@ fn size() -> (usize, usize) {
 }
 
 // clears the screen and draws everything
-pub fn all(playlist: &Playlist) {
-    let (_, height) = size();
+pub fn all(playlist: &Playlist, chan: &rfmod::Channel) {
     print!("{}{}", clear::All, cursor::Goto(1, 1));
     stdout().flush().unwrap();
+    music(playlist);
+    controls(playlist, chan);
+}
+
+// draws every displayable song
+pub fn music(playlist: &Playlist) {
+    let (_, height) = size();
     for i in 0..height-1 {
         if i < playlist.songs.len() {
             playlist.songs[i].draw(i == playlist.index);
@@ -45,9 +52,26 @@ impl Song {
 
 pub fn load_progress(progress: f32) {
     let (width, height) = size();
-    let bar = "#".repeat((progress * (width as f32 - 7.0)) as usize);
-    let percent = ((progress * 100.0) as usize).to_string();
+    let percent = format!(" {:3}%", ((progress * 100.0) as usize));
+    let bar = "█".repeat((progress * (width - percent.len()) as f32) as usize);
+    let empty = "░".repeat(width - bar.chars().count() - percent.len());
 
-    print!("{save}{goto}[{bar}{empty}]{spaces}{percent}%{restore}", save=cursor::Save, goto=cursor::Goto(1, height as u16), bar=bar, empty=" ".repeat(width - bar.len() - 7), spaces=" ".repeat(4 - percent.len()), percent=percent, restore=cursor::Restore);
+    print!("{save}{goto}{bar}{percent}{restore}", save=cursor::Save, goto=cursor::Goto(1, height as u16), bar=bar+&empty, percent=percent, restore=cursor::Restore);
+    stdout().flush().unwrap();
+}
+
+pub fn controls(playlist: &Playlist, chan: &rfmod::Channel) {
+    let (width, height) = size();
+    let ms_played = chan.get_position(rfmod::TIMEUNIT_MS).unwrap();
+    let secs_total = playlist.get_song().duration.as_secs();
+    let mut progress = ms_played as f32 / 1000.0 / secs_total as f32;
+    if progress > 1.0 {
+        progress = 1.0;
+    }
+    let timestamp = format!(" [{:02}:{:02}/{:02}:{:02}]", ms_played / 1000 / 60, ms_played / 1000 % 60, secs_total / 60, secs_total % 60);
+    let bar = "█".repeat((progress * (width - timestamp.len()) as f32) as usize);
+    let empty = "░".repeat(width - bar.chars().count() - timestamp.len());
+
+    print!("{goto}{bar}{timestamp}", goto=cursor::Goto(1, height as u16), bar=bar+&empty, timestamp=timestamp);
     stdout().flush().unwrap();
 }
