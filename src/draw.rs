@@ -45,7 +45,7 @@ pub fn all(playlist: &Playlist, chan: &rfmod::Channel) {
 // draws every displayable song
 pub fn music(playlist: &Playlist) {
     for song in playlist.get_displayed_songs() {
-        song.draw(song == playlist.get_song());
+        song.draw(song.index == playlist.get_song().index);
     }
 }
 

@@ -15,13 +15,17 @@ use std::sync::Mutex;
 use std::sync::mpsc;
 use std::thread;
 use termion::cursor;
+use termion::event::Event;
 use termion::event::Key;
+use termion::event::MouseEvent;
+use termion::input::MouseTerminal;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::screen;
 
 pub enum Command {
     Draw,
+    Play(usize),
     Pause,
     Prev,
     Skip,
@@ -29,7 +33,7 @@ pub enum Command {
 
 fn main() {
     let stdin = stdin();
-    let mut stdout = stdout().into_raw_mode().unwrap();
+    let mut stdout = MouseTerminal::from(stdout().into_raw_mode().unwrap());
 
     print!("{}{}{}", screen::ToAlternateScreen, cursor::Hide, cursor::Goto(1, 1));
     stdout.flush().unwrap();
@@ -60,18 +64,31 @@ fn main() {
     }
 
     // wait for q or ^C
-    for key in stdin.keys() {
-        match key.unwrap() {
-            Key::Char('q') => { break }
-            Key::Ctrl('c') => { break }
-            Key::Char(' ') => {
-                ctrl_tx.send(Command::Pause).unwrap();
+    for event in stdin.events() {
+        match event.unwrap() {
+            Event::Key(key) => match key {
+                Key::Char('q') => { break }
+                Key::Ctrl('c') => { break }
+                Key::Char(' ') => {
+                    ctrl_tx.send(Command::Pause).unwrap();
+                }
+                Key::Up => {
+                    ctrl_tx.send(Command::Prev).unwrap();
+                }
+                Key::Down => {
+                    ctrl_tx.send(Command::Skip).unwrap();
+                }
+                _ => {}
             }
-            Key::Up => {
-                ctrl_tx.send(Command::Prev).unwrap();
-            }
-            Key::Down => {
-                ctrl_tx.send(Command::Skip).unwrap();
+            Event::Mouse(MouseEvent::Press(_, x, y)) => {
+                let (width, height) = termion::terminal_size().unwrap();
+                if y == height {
+                    // TODO
+                } else {
+                    let playlist = playlist.lock().unwrap();
+                    let song = &playlist.get_displayed_songs()[y as usize - 1];
+                    ctrl_tx.send(Command::Play(song.index)).unwrap();
+                }
             }
             _ => {}
         }

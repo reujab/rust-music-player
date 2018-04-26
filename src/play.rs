@@ -51,6 +51,10 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
                 Ok(Command::Draw) => {
                     draw::all(&playlist.lock().unwrap(), &chan);
                 }
+                Ok(Command::Play(index)) => {
+                    playlist.lock().unwrap().index = index;
+                    break;
+                }
                 Ok(Command::Pause) => {
                     chan.set_paused(!chan.get_paused().unwrap());
                 }

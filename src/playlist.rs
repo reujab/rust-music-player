@@ -52,6 +52,7 @@ impl Playlist {
             }
 
             let song = Song{
+                index: i,
                 path: path.to_string(),
                 artist: tag.artist().unwrap().to_string(),
                 title: tag.title().unwrap().to_string(),
@@ -72,8 +73,8 @@ impl Playlist {
     }
 }
 
-#[derive(PartialEq)]
 pub struct Song {
+    pub index: usize,
     pub path: String,
     pub artist: String,
     pub title: String,
