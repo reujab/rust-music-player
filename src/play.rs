@@ -15,7 +15,6 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
         panic!("failed to initialize fmod");
     }
 
-    let mut prev = false;
     loop {
         let mp3 = fmod.create_sound(&playlist.lock().unwrap().get_song().path, None, None).unwrap();
         // `chan` CANNOT be used in any other thread than the one it is created in
@@ -31,16 +30,9 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
                     let mut playlist = playlist.lock().unwrap();
                     let playing = chan.is_playing();
                     if playing.is_err() || !playing.unwrap() {
-                        if prev {
-                            prev = false;
-                            if playlist.index != 0 {
-                                playlist.index -= 1;
-                            }
-                        } else {
-                            playlist.index += 1;
-                            if playlist.index == playlist.songs.len() {
-                                playlist.index = 0;
-                            }
+                        playlist.index += 1;
+                        if playlist.index == playlist.songs.len() {
+                            playlist.index = 0;
                         }
                         break;
                     }
@@ -59,8 +51,11 @@ pub fn play(playlist: Arc<Mutex<Playlist>>, ctrl_rx: mpsc::Receiver<Command>) {
                     chan.set_paused(!chan.get_paused().unwrap());
                 }
                 Ok(Command::Prev) => {
-                    prev = true;
-                    chan.stop();
+                    let mut playlist = playlist.lock().unwrap();
+                    if playlist.index != 0 {
+                        playlist.index -= 1;
+                    }
+                    break;
                 }
                 Ok(Command::Skip) => {
                     chan.stop();
