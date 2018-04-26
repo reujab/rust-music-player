@@ -59,7 +59,7 @@ impl Song {
 
 pub fn load_progress(progress: f32) {
     let (width, height) = size();
-    let percent = format!(" {:3}%", ((progress * 100.0) as usize));
+    let percent = format!(" {:3}%", (progress * 100.0) as usize);
     let bar = "█".repeat((progress * (width - percent.len()) as f32) as usize);
     let empty = "░".repeat(width - bar.chars().count() - percent.len());
 
