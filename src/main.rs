@@ -43,7 +43,10 @@ fn main() {
     // music control channel
     let (ctrl_tx, ctrl_rx) = mpsc::channel();
 
-    play(playlist.clone(), ctrl_rx);
+    {
+        let playlist = playlist.clone();
+        thread::spawn(move || play(playlist, ctrl_rx));
+    }
 
     // redraw when the terminal window is resized
     {
