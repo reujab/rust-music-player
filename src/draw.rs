@@ -16,6 +16,24 @@ fn size() -> (usize, usize) {
     (width as usize, height as usize)
 }
 
+impl Playlist {
+    pub fn get_displayed_songs(&self) -> &[Song] {
+        let (_, height) = size();
+        let begin = if self.index < 3 || self.songs.len() <= height-1 {
+            0
+        } else if self.songs[self.index..].len() < height - 3 {
+            self.songs.len() - height + 1
+        } else {
+            self.index - 3
+        };
+        if begin + height - 1 > self.songs.len() {
+            &self.songs[begin..self.songs.len()]
+        } else {
+            &self.songs[begin..begin+height-1]
+        }
+    }
+}
+
 // clears the screen and draws everything
 pub fn all(playlist: &Playlist, chan: &rfmod::Channel) {
     print!("{}{}", clear::All, cursor::Goto(1, 1));
@@ -26,18 +44,8 @@ pub fn all(playlist: &Playlist, chan: &rfmod::Channel) {
 
 // draws every displayable song
 pub fn music(playlist: &Playlist) {
-    let (_, height) = size();
-    let begin = if playlist.index < 3 || playlist.songs.len() <= height-1 {
-        0
-    } else if playlist.songs[playlist.index..].len() < height - 3 {
-        playlist.songs.len() - height + 1
-    } else {
-        playlist.index - 3
-    };
-    for i in begin..begin+height-1 {
-        if i < playlist.songs.len() {
-            playlist.songs[i].draw(i == playlist.index);
-        }
+    for song in playlist.get_displayed_songs() {
+        song.draw(song == playlist.get_song());
     }
 }
 

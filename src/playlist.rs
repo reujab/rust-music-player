@@ -72,6 +72,7 @@ impl Playlist {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Song {
     pub path: String,
     pub artist: String,
