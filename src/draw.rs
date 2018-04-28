@@ -95,9 +95,15 @@ pub fn controls(playlist: &Playlist, chan: &rfmod::Channel) {
     if progress > 1.0 {
         progress = 1.0;
     }
+
+    let controls = if chan.get_paused().unwrap() {
+        "▶"
+    } else {
+        "⏸"
+    }.to_owned() + " ";
     let timestamp = format!(" [{:02}:{:02}/{:02}:{:02}]", ms_played / 1000 / 60, ms_played / 1000 % 60, secs_total / 60, secs_total % 60);
     let bar = bar(width - controls.chars().count() - timestamp.len(), progress);
 
-    print!("{goto}{bar}{timestamp}", goto=cursor::Goto(1, height as u16), bar=bar, timestamp=timestamp);
+    print!("{goto}{controls}{bar}{timestamp}", goto=cursor::Goto(1, height as u16), controls=controls, bar=bar, timestamp=timestamp);
     stdout().flush().unwrap();
 }

@@ -81,9 +81,11 @@ fn main() {
                 _ => {}
             }
             Event::Mouse(MouseEvent::Press(_, x, y)) => {
-                let (width, height) = termion::terminal_size().unwrap();
+                let (_, height) = termion::terminal_size().unwrap();
                 if y == height {
-                    // TODO
+                    if x == 1 {
+                        ctrl_tx.send(Command::Pause).unwrap();
+                    }
                 } else {
                     let playlist = playlist.lock().unwrap();
                     let song = &playlist.get_displayed_songs()[y as usize - 1];
