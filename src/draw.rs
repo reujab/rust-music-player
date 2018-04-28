@@ -34,6 +34,19 @@ impl Playlist {
     }
 }
 
+fn bar(width: usize, percentage: f32) -> String {
+    let bar_width = width as f32 * percentage;
+    let full_blocks = bar_width as usize;
+    // round down to nearest eight
+    let eighth = ((bar_width - bar_width.floor()) * 8.0).floor() / 8.0;
+
+    const BLOCKS: &[&str] = &["", "▏", "▎", "▍", "▌", "▋", "▊", "▉"];
+    let bar = "█".repeat(full_blocks) + BLOCKS[(eighth * 8.0) as usize];
+    let empty = " ".repeat(width - bar.chars().count());
+
+    format!("{}{}{}{}{}", color::Bg(color::White), color::Fg(color::Rgb(244, 67, 54)), bar, empty, style::Reset)
+}
+
 // clears the screen and draws everything
 pub fn all(playlist: &Playlist, chan: &rfmod::Channel) {
     print!("{}{}", clear::All, cursor::Goto(1, 1));
@@ -68,10 +81,9 @@ impl Song {
 pub fn load_progress(progress: f32) {
     let (width, height) = size();
     let percent = format!(" {:3}%", (progress * 100.0) as usize);
-    let bar = "█".repeat((progress * (width - percent.len()) as f32) as usize);
-    let empty = "░".repeat(width - bar.chars().count() - percent.len());
+    let bar = bar(width - percent.len(), progress);
 
-    print!("{save}{goto}{bar}{percent}{restore}", save=cursor::Save, goto=cursor::Goto(1, height as u16), bar=bar+&empty, percent=percent, restore=cursor::Restore);
+    print!("{save}{goto}{bar}{percent}{restore}", save=cursor::Save, goto=cursor::Goto(1, height as u16), bar=bar, percent=percent, restore=cursor::Restore);
     stdout().flush().unwrap();
 }
 
@@ -84,9 +96,8 @@ pub fn controls(playlist: &Playlist, chan: &rfmod::Channel) {
         progress = 1.0;
     }
     let timestamp = format!(" [{:02}:{:02}/{:02}:{:02}]", ms_played / 1000 / 60, ms_played / 1000 % 60, secs_total / 60, secs_total % 60);
-    let bar = "█".repeat((progress * (width - timestamp.len()) as f32) as usize);
-    let empty = "░".repeat(width - bar.chars().count() - timestamp.len());
+    let bar = bar(width - controls.chars().count() - timestamp.len(), progress);
 
-    print!("{goto}{bar}{timestamp}", goto=cursor::Goto(1, height as u16), bar=bar+&empty, timestamp=timestamp);
+    print!("{goto}{bar}{timestamp}", goto=cursor::Goto(1, height as u16), bar=bar, timestamp=timestamp);
     stdout().flush().unwrap();
 }
